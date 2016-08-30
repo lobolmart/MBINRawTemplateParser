@@ -1,0 +1,4 @@
+*.suo
+*csproj.user
+MBINRawTemplateParser/bin
+MBINRawTemplateParser/obj

@@ -418,9 +418,6 @@ namespace MBINRawTemplateParser
 
             Console.WriteLine("number of properties parsed: " + propCounter.ToString());
 
-            if (output.Equals(EMPTY_STRING))
-                Console.WriteLine("something went wrong - no output produced!");
-
             return output;
         }
     }

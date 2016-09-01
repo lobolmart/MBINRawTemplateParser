@@ -436,7 +436,7 @@ namespace MBINRawTemplateParser
             output += header;
 
             len = lines.Length;
-            for (i = i;  i < len; i++) {
+            for (; i < len; i++) {
                 string line = lines[i];
                 if (!line.Equals(EMPTY_STRING))
                     line = TAB2 + "// line: " + line + "\n";

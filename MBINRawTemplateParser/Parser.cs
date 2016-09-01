@@ -413,15 +413,30 @@ namespace MBINRawTemplateParser
             Console.WriteLine("parsing...");
             string output = EMPTY_STRING;
 
+            int propCounter = 0;
+
+            int i = 0;
+            int len = lines.Length;
+            for (i = 0;  i < len; i++) {
+                string line = lines[i];
+                if ((hasStr(line, ")") && hasStr(line, "(")) && line.IndexOf("//") != 0)
+                    break;
+            }
+
+            if (i == len) {
+                Console.WriteLine("skipped the whole input for some reason!");
+                return output;
+            }
+
             string templateHash = FNV32.getHash(string.Join("\n", lines)).ToString("X");
-            string routineHash = FNV32.getHash(lines[0]).ToString("X");
-            string header = "// generated output for subroutine:\n// " + lines[0] + " -----> hash: " + routineHash +
+            string routineHash = FNV32.getHash(lines[i]).ToString("X");
+            string header = "// generated output for subroutine:\n// " + lines[i] + " -----> hash: " + routineHash +
                 "\n// hash of whole input: " + templateHash + "\n\n";
             header += HEADER_START + "UnknownTemplate" + routineHash + HEADER_END;
             output += header;
 
-            int i, len = lines.Length, propCounter = 0;
-            for (i = 1; i < len; i++) {
+            len = lines.Length;
+            for (i = i;  i < len; i++) {
                 string line = lines[i];
                 if (!line.Equals(EMPTY_STRING))
                     line = TAB2 + "// line: " + line + "\n";

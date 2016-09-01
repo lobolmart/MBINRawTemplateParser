@@ -90,12 +90,22 @@ namespace MBINRawTemplateParser
             return hasStr(line, "  do") || hasStr(line, "  while");
         }
 
+        // clould be something in the lines of ^[a,v]\w*$ at some point
+        private bool hasVar(string str)
+        {
+            for (int i = 0; i < 16; i++) {
+                if (hasStr(str, "a" + i.ToString()) || hasStr(str, "v" + i.ToString()))
+                    return true;
+            }
+            return false;
+        }
+
         private LineType getLineType(string line)
         {
             if (isLineBlock(line))
                 return LineType.BLOCK;
 
-            if (!hasStr(line, "a1") && !hasStr(line, "v1")) // not acting on the buffer?
+            if (!hasVar(line)) // no variables -  not acting on the buffer?
                 return LineType.NOP;
 
             if (isLineString(line))

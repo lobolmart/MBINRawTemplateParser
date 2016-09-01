@@ -9,7 +9,7 @@ namespace MBINRawTemplateParser
     {
         private static readonly string EMPTY_STRING = "";
         private static readonly string VAR_PREFIX = "Unknown";
-        private static readonly string TAB = "\t";
+        private static readonly string TAB = "    ";
         private static readonly string TAB2 = TAB + TAB;
 
         private static readonly string HEADER_START = "namespace MBINCompiler.Models.Structs\n{\n" +
@@ -17,7 +17,7 @@ namespace MBINRawTemplateParser
         private static readonly string HEADER_END = " : NMSTemplate\n" + TAB + "{\n";
         private static readonly string FOOTER = TAB + "}\n}\n";
 
-        private static readonly string COMMENT_START = TAB2 + " // ";
+        private static readonly string COMMENT_START = TAB + " // ";
 
         private bool verbose;
 
@@ -398,7 +398,7 @@ namespace MBINRawTemplateParser
             for (i = 1; i < len; i++) {
                 string line = lines[i];
                 if (!line.Equals(EMPTY_STRING))
-                    line = TAB2 + " // line: " + line + "\n";
+                    line = TAB2 + "// line: " + line + "\n";
 
                 if (skipNextLine) {
                     skipNextLine = false;

@@ -9,8 +9,10 @@ namespace MBINRawTemplateParser
         {
 
 #if DEBUG
-            string inputFile = "testinput.c";
             bool verbose = true;
+            string inputFile = "testinput.c";
+            if (args.Length > 0)
+                inputFile = args[0];
 #else
             if (args.Length == 0) {
                 Console.WriteLine("bad input");

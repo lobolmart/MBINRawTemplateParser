@@ -295,8 +295,14 @@ namespace MBINRawTemplateParser
 
             // no subroutines at offset 0?
 
-            int idxPlus = line.IndexOf("+ ") + 2;
-            string offset = line.Substring(idxPlus, line.LastIndexOf(");") - idxPlus);
+            int idxPlus = line.IndexOf("+ ");
+            if (idxPlus == -1)
+                idxPlus = line.IndexOf("- ");
+            string offset = "0";
+            if (idxPlus != -1) {
+                idxPlus += 2;
+                offset = line.Substring(idxPlus, line.LastIndexOf(");") - idxPlus);
+            }
 
             string offsetHex;
             bool parsedValue;
@@ -318,8 +324,18 @@ namespace MBINRawTemplateParser
                 szStr = "0";
                 szStrComment = "unknown";
             } else {
-                idxPlus = nextLine.IndexOf("+ ") + 2;
-                string offsetNext = nextLine.Substring(idxPlus, nextLine.LastIndexOf(")") - idxPlus);
+                string offsetNext;
+                if (hasStr(nextLine, " + ") || hasStr(nextLine, " - ")) {
+                    idxPlus = nextLine.IndexOf("+ ") + 2;
+                    if (idxPlus == -1)
+                        idxPlus = nextLine.IndexOf("- ") + 2;
+                    if (idxPlus == -1)
+                        offsetNext = offset;
+                    else
+                        offsetNext = nextLine.Substring(idxPlus, nextLine.LastIndexOf(")") - idxPlus);
+                } else {
+                    offsetNext = offset;
+                }
 
                 int offsetIntNext;
                 if (offsetNext.IndexOf("0x") > -1)

@@ -280,7 +280,6 @@ namespace MBINRawTemplateParser
             if (args.Length == 3) {
                 string sz = args[2]; // only hex sz??
                 sz = sz.Replace(" ", "").Replace("ui64);", ""); // hex only?
-                res += TAB2 + "[NMS(Size = " + sz + ")]\r\n";
                 string offset = args[0];
                 offset = offset.Substring(offset.IndexOf("+ ") + 2);
                 offset = offset.Replace(")", "");
@@ -300,6 +299,8 @@ namespace MBINRawTemplateParser
                 int szInt;
                 int.TryParse(sz.Substring(2), NumberStyles.AllowHexSpecifier, null, out szInt);
                 res += updateOffsetDiff(offsetInt, szInt);
+
+                res += TAB2 + "[NMS(Size = " + sz + ")]\r\n";
 
                 res += TAB2 + "public string " + VAR_PREFIX + offsetHex + ";";
                 res += COMMENT_START + "offset: " + offset + ", sz: " + szInt.ToString() + ", origin: " + args[1];
@@ -469,7 +470,7 @@ namespace MBINRawTemplateParser
                 }
             }
 
-            for (i = 0;  i < len; i++) {
+            for (i = 0; i < len; i++) {
                 string line = lines[i];
                 if ((hasStr(line, ")") && hasStr(line, "(")) && line.IndexOf("//") != 0)
                     break;
@@ -483,7 +484,7 @@ namespace MBINRawTemplateParser
             string templateHash = FNV32.getHash(string.Join("\r\n", lines)).ToString("X");
             string routineHash = FNV32.getHash(lines[i]).ToString("X");
             string header = "// generated output for subroutine:\r\n// " + lines[i] + " -----> hash: " + routineHash +
-                "\r\n// hash of whole input: " + templateHash + "\r\n\r\n";            
+                "\r\n// hash of whole input: " + templateHash + "\r\n\r\n";
             header += HEADER_START + (className != null ? className : "UnknownTemplate" + routineHash) + HEADER_END;
             output += header;
 

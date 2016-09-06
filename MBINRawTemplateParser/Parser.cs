@@ -282,8 +282,16 @@ namespace MBINRawTemplateParser
                 string sz = args[2]; // only hex sz??
                 sz = sz.Replace(" ", "").Replace("ui64);", ""); // hex only?
                 string offset = args[0];
-                offset = offset.Substring(offset.IndexOf("+ ") + 2);
-                offset = offset.Replace(")", "");
+
+                if (offset.IndexOf("+ ") > -1) {
+                    offset = offset.Substring(offset.IndexOf("+ ") + 2);
+                    offset = offset.Replace(")", "");
+                } else if (offset.IndexOf("- ") > -1) {
+                    offset = offset.Substring(offset.IndexOf("- ") + 2);
+                    offset = offset.Replace(")", "");
+                } else {
+                    offset = "0";
+                }
 
                 string offsetHex;
                 bool parsedValue;
@@ -298,7 +306,8 @@ namespace MBINRawTemplateParser
                     offsetHex = offset + "_int";
 
                 int szInt;
-                int.TryParse(sz.Substring(2), NumberStyles.AllowHexSpecifier, null, out szInt);
+                string szToParse = hasStr(sz, "0x") ? sz.Substring(2) : sz;
+                int.TryParse(szToParse, NumberStyles.AllowHexSpecifier, null, out szInt);
                 res += updateOffsetDiff(offsetInt, szInt);
 
                 res += TAB2 + "[NMS(Size = " + sz + ")]\r\n";

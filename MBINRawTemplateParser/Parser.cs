@@ -29,10 +29,10 @@ namespace MBINRawTemplateParser
         private static readonly string TAB = "    ";
         private static readonly string TAB2 = TAB + TAB;
 
-        private static readonly string HEADER_START = "namespace MBINCompiler.Models.Structs\n{\n" +
+        private static readonly string HEADER_START = "namespace MBINCompiler.Models.Structs\r\n{\r\n" +
             TAB + "public class ";
-        private static readonly string HEADER_END = " : NMSTemplate\n" + TAB + "{\n" + TAB2 + "// generated with MBINRawTemplateParser\n\n";
-        private static readonly string FOOTER = TAB + "}\n}\n";
+        private static readonly string HEADER_END = " : NMSTemplate\r\n" + TAB + "{\r\n" + TAB2 + "// generated with MBINRawTemplateParser\r\n\r\n";
+        private static readonly string FOOTER = TAB + "}\r\n}\r\n";
 
         private static readonly string COMMENT_START = TAB + " // ";
         private string className = null;
@@ -55,8 +55,8 @@ namespace MBINRawTemplateParser
             // Console.WriteLine("offset:" + offset + ", lastOffset: " + lastOffset + ", sz: " + lastOffsetSz);
 
             if (diff > 0) {
-                res = "\n" + TAB2 + "// missing " + diff.ToString() +
-                    " bytes at offset " + lastOffset.ToString() + "\n" + TAB2 + "// ";
+                res = "\r\n" + TAB2 + "// missing " + diff.ToString() +
+                    " bytes at offset " + lastOffset.ToString() + "\r\n" + TAB2 + "// ";
                 switch (diff) {
                     default:
                         res += "could be a subroutine, padding or something that the parser skipped";
@@ -72,9 +72,9 @@ namespace MBINRawTemplateParser
                         break;
                 }
                 int padOffset = lastOffset + lastOffsetSz;
-                res += "\n" + TAB2 + "[NMS(Size = 0x" + diff.ToString("X") + ", Ignore = true)]\n";
+                res += "\r\n" + TAB2 + "[NMS(Size = 0x" + diff.ToString("X") + ", Ignore = true)]\r\n";
                 res += TAB2 + "public byte[] Padding" + padOffset.ToString("X") + ";" +
-                    TAB2 + "// offset: " + padOffset.ToString() + ", sz: " + diff + ", comment: auto padding \n\n";
+                    TAB2 + "// offset: " + padOffset.ToString() + ", sz: " + diff + ", comment: auto padding \r\n\r\n";
             }
 
             lastOffset = offset;
@@ -237,7 +237,7 @@ namespace MBINRawTemplateParser
                         // first float is a value
                         valueStr = valueStr.Replace(',', '.');
                         res += TAB2 + "public " + type + " " + VAR_PREFIX + offsetHex + ";";
-                        res += COMMENT_START + "offset: " + offset + ", sz: 4, origin: " + valueStrOrigin + ", parsed: " + valueStr + packedComment + "(1)" + "\n";
+                        res += COMMENT_START + "offset: " + offset + ", sz: 4, origin: " + valueStrOrigin + ", parsed: " + valueStr + packedComment + "(1)" + "\r\n";
 
                         // second float is a 0
                         offsetInt += 4;
@@ -280,7 +280,7 @@ namespace MBINRawTemplateParser
             if (args.Length == 3) {
                 string sz = args[2]; // only hex sz??
                 sz = sz.Replace(" ", "").Replace("ui64);", ""); // hex only?
-                res += TAB2 + "[NMS(Size = " + sz + ")]\n";
+                res += TAB2 + "[NMS(Size = " + sz + ")]\r\n";
                 string offset = args[0];
                 offset = offset.Substring(offset.IndexOf("+ ") + 2);
                 offset = offset.Replace(")", "");
@@ -385,9 +385,9 @@ namespace MBINRawTemplateParser
                 res += updateOffsetDiff(offsetInt, sz);
 
                 string lineTrim = line.TrimStart(' ');
-                res += "\n" + TAB2 + "// call to subroutine: " + lineTrim.Substring(0, lineTrim.IndexOf("(")) + "\n";
-                res += TAB2 + "// filling with bytes as we don't have a way to expand it for now\n";
-                res += TAB2 + "[NMS(Size = 0x" + sz.ToString("X") + ", Ignore = false)]\n";
+                res += "\r\n" + TAB2 + "// call to subroutine: " + lineTrim.Substring(0, lineTrim.IndexOf("(")) + "\r\n";
+                res += TAB2 + "// filling with bytes as we don't have a way to expand it for now\r\n";
+                res += TAB2 + "[NMS(Size = 0x" + sz.ToString("X") + ", Ignore = false)]\r\n";
                 res += TAB2 + "public byte[] Subroutine" + offsetHex + ";";
                 res += COMMENT_START + "offset: " + offset + ", sz: " + szStrComment + ", origin: " + lineTrim;
             }
@@ -398,7 +398,7 @@ namespace MBINRawTemplateParser
         private string parseBlock(string line)
         {
             string res = EMPTY_STRING;
-            res = "\n" + COMMENT_START + "comment: 'do/while' loop start/end detected, origin: " + line;
+            res = "\r\n" + COMMENT_START + "comment: 'do/while' loop start/end detected, origin: " + line;
             return res;
         }
 
@@ -480,10 +480,10 @@ namespace MBINRawTemplateParser
                 return output;
             }
 
-            string templateHash = FNV32.getHash(string.Join("\n", lines)).ToString("X");
+            string templateHash = FNV32.getHash(string.Join("\r\n", lines)).ToString("X");
             string routineHash = FNV32.getHash(lines[i]).ToString("X");
-            string header = "// generated output for subroutine:\n// " + lines[i] + " -----> hash: " + routineHash +
-                "\n// hash of whole input: " + templateHash + "\n\n";            
+            string header = "// generated output for subroutine:\r\n// " + lines[i] + " -----> hash: " + routineHash +
+                "\r\n// hash of whole input: " + templateHash + "\r\n\r\n";            
             header += HEADER_START + (className != null ? className : "UnknownTemplate" + routineHash) + HEADER_END;
             output += header;
 
@@ -491,7 +491,7 @@ namespace MBINRawTemplateParser
             for (; i < len; i++) {
                 string line = lines[i];
                 if (!line.Equals(EMPTY_STRING))
-                    line = TAB2 + "// line: " + line + "\n";
+                    line = TAB2 + "// line: " + line + "\r\n";
 
                 if (skipNextLine) {
                     skipNextLine = false;

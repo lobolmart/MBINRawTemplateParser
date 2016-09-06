@@ -31,10 +31,11 @@ namespace MBINRawTemplateParser
 
         private static readonly string HEADER_START = "namespace MBINCompiler.Models.Structs\n{\n" +
             TAB + "public class ";
-        private static readonly string HEADER_END = " : NMSTemplate\n" + TAB + "{\n";
+        private static readonly string HEADER_END = " : NMSTemplate\n" + TAB + "{\n" + TAB2 + "// generated with MBINRawTemplateParser\n\n";
         private static readonly string FOOTER = TAB + "}\n}\n";
 
         private static readonly string COMMENT_START = TAB + " // ";
+        private string className = null;
 
         private bool verbose;
 
@@ -457,10 +458,14 @@ namespace MBINRawTemplateParser
             for (i = 0; i < len; i++) {
                 string line = lines[i];
                 line = line.Trim();
+                string[] args;
                 if (line.StartsWith("#define_sub")) { // #define_sub sub_140141660 GcGalaxyMarkerSettings 112
-                    string[] args = line.Split(' ');
+                    args = line.Split(' ');
                     int sz = int.Parse(args[3]);
                     preSubs.Add(args[1], new Sub(args[1], args[2], sz));
+                } else if (line.StartsWith("#define_class")) {
+                    args = line.Split(' ');
+                    className = args[1];
                 }
             }
 
@@ -478,8 +483,8 @@ namespace MBINRawTemplateParser
             string templateHash = FNV32.getHash(string.Join("\n", lines)).ToString("X");
             string routineHash = FNV32.getHash(lines[i]).ToString("X");
             string header = "// generated output for subroutine:\n// " + lines[i] + " -----> hash: " + routineHash +
-                "\n// hash of whole input: " + templateHash + "\n\n";
-            header += HEADER_START + "UnknownTemplate" + routineHash + HEADER_END;
+                "\n// hash of whole input: " + templateHash + "\n\n";            
+            header += HEADER_START + (className != null ? className : "UnknownTemplate" + routineHash) + HEADER_END;
             output += header;
 
             len = lines.Length;

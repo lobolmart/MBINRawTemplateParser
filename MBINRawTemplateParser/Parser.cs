@@ -1,12 +1,29 @@
 ﻿using System;
 using System.Globalization;
+using System.Collections.Generic;
 
 namespace MBINRawTemplateParser
 {
     enum LineType { NOP, NUMBER, STRING, CALL, BLOCK };
 
+    class Sub
+    {
+        public string subName;
+        public string className;
+        public int sz;
+
+        public Sub(string subName, string className, int sz)
+        {
+            this.subName = subName;
+            this.className = className;
+            this.sz = sz;
+        }
+    }
+
     class Parser
     {
+        private Dictionary<string, Sub> preSubs = new Dictionary<string, Sub>();
+
         private static readonly string EMPTY_STRING = "";
         private static readonly string VAR_PREFIX = "Unknown";
         private static readonly string TAB = "    ";
@@ -348,14 +365,31 @@ namespace MBINRawTemplateParser
                 szStrComment = szStr;
             }
 
-            res += updateOffsetDiff(offsetInt, sz);
+            // check for sub in dictionary
+            Sub subMatch = null;
+            foreach (KeyValuePair<string, Sub> entry in preSubs) {
+                if (hasStr(line, entry.Key)) {
+                    subMatch = entry.Value;
+                    break;
+                }
+            }
 
-            string lineTrim = line.TrimStart(' ');
-            res += "\n" + TAB2 + "// call to subroutine: " + lineTrim.Substring(0, lineTrim.IndexOf("(")) + "\n";
-            res += TAB2 + "// filling with bytes as we don't have a way to expand it for now\n";
-            res += TAB2 + "[NMS(Size = 0x" + sz.ToString("X") + ", Ignore = false)]\n";
-            res += TAB2 + "public byte[] Subroutine" + offsetHex + ";";
-            res += COMMENT_START + "offset: " + offset + ", sz: " + szStrComment + ", origin: " + lineTrim + "\n";
+            if (subMatch != null) {
+                res += updateOffsetDiff(offsetInt, subMatch.sz);
+
+                string lineTrim = line.TrimStart(' ');
+                res += TAB2 + "public " + subMatch.className + " Template" + offsetHex + ";";
+                res += COMMENT_START + "offset: " + offset + ", sz: " + subMatch.sz.ToString() + ", origin: " + lineTrim + ", comment: call sub";
+            } else {
+                res += updateOffsetDiff(offsetInt, sz);
+
+                string lineTrim = line.TrimStart(' ');
+                res += "\n" + TAB2 + "// call to subroutine: " + lineTrim.Substring(0, lineTrim.IndexOf("(")) + "\n";
+                res += TAB2 + "// filling with bytes as we don't have a way to expand it for now\n";
+                res += TAB2 + "[NMS(Size = 0x" + sz.ToString("X") + ", Ignore = false)]\n";
+                res += TAB2 + "public byte[] Subroutine" + offsetHex + ";";
+                res += COMMENT_START + "offset: " + offset + ", sz: " + szStrComment + ", origin: " + lineTrim;
+            }
 
             return res;
         }
@@ -417,6 +451,19 @@ namespace MBINRawTemplateParser
 
             int i = 0;
             int len = lines.Length;
+
+
+            // preprocessor
+            for (i = 0; i < len; i++) {
+                string line = lines[i];
+                line = line.Trim();
+                if (line.StartsWith("#define_sub")) { // #define_sub sub_140141660 GcGalaxyMarkerSettings 112
+                    string[] args = line.Split(' ');
+                    int sz = int.Parse(args[3]);
+                    preSubs.Add(args[1], new Sub(args[1], args[2], sz));
+                }
+            }
+
             for (i = 0;  i < len; i++) {
                 string line = lines[i];
                 if ((hasStr(line, ")") && hasStr(line, "(")) && line.IndexOf("//") != 0)

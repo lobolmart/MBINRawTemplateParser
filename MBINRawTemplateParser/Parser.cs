@@ -506,8 +506,13 @@ namespace MBINRawTemplateParser
             len = lines.Length;
             for (; i < len; i++) {
                 string line = lines[i];
-                if (!line.Equals(EMPTY_STRING))
+                if (line.StartsWith("//")) {
                     line = TAB2 + "// line: " + line + "\r\n";
+                    output += line;
+                    continue;
+                } else if (!line.Equals(EMPTY_STRING)) {
+                    line = TAB2 + "// line: " + line + "\r\n";
+                }
 
                 if (skipNextLine) {
                     skipNextLine = false;

@@ -252,13 +252,13 @@ namespace MBINRawTemplateParser
                 }
 
                 if (valueIs64Bit && valueStr.IndexOf("E") == -1) {
-                    if (hasStr(line, " = 0i64")) { // either a long or two floats?
+                    if (hasStr(line, " = 0i64")) { // either a long, two floats or two ints?
 
                         res += updateOffsetDiff(offsetInt, 8);
 
                         sz = 8;
                         type = "long";
-                        valueStr = "0, comment: either a long or two floats";
+                        valueStr = "0, comment: either a long, two floats or two ints?";
                     } else {
                         // e.g. *(_QWORD *)(v1 + 15680) = 0x40000000i64;
 

@@ -69,11 +69,14 @@ namespace MBINRawTemplateParser
             }
 
             if (diff > 0) {
+                int tmpDiff = diff;
                 res += "\r\n" + TAB2 + "// missing " + diff.ToString() +
                     " bytes at offset " + lastOffset.ToString() + "\r\n" + TAB2 + "// ";
-                switch (diff) {
+                if (isLineString(lastNonSkippedLine))
+                    tmpDiff = 1 << 4;
+                switch (tmpDiff) {
                     default:
-                        res += "could be a subroutine, padding or something that the parser skipped";
+                        res += "could be padding, a undefined subroutine or a pointer accessing larger memory";
                         break;
                     case 1:
                         res += "does " + lastOffset.ToString() + " contain a WORD?";
@@ -85,6 +88,9 @@ namespace MBINRawTemplateParser
                     case 6:
                     case 7:
                         res += "does " + lastOffset.ToString() + " contain a QWORD?";
+                        break;
+                    case (1 << 4):
+                        res += "does " + lastOffset.ToString() + " contain a string which doesn't use all available space?";
                         break;
                 }
                 int padOffset = lastOffset + lastOffsetSz;

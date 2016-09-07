@@ -36,7 +36,8 @@ namespace MBINRawTemplateParser
 
         private static readonly string COMMENT_START = TAB + " // ";
         private string className = null;
-        private bool stringAutoNull = false;
+        private bool skipStringNull = true;
+        private bool skipStrupr = true;
 
         private bool verbose;
 
@@ -431,7 +432,7 @@ namespace MBINRawTemplateParser
             switch (lineType) {
                 case LineType.STRING:
                     result = parseString(line);
-                    if (!result.Equals(EMPTY_STRING) && stringAutoNull)
+                    if (!result.Equals(EMPTY_STRING) && skipStringNull)
                         skipNextLine = true;
                     break;
                 case LineType.NUMBER:
@@ -480,8 +481,10 @@ namespace MBINRawTemplateParser
                 } else if (line.StartsWith("#define_class")) {
                     args = line.Split(' ');
                     className = args[1];
-                } else if (line.StartsWith("#define_skip_string_null")) {
-                    stringAutoNull = true;
+                } else if (line.StartsWith("#define_no_skip_string_null")) {
+                    skipStringNull = false;
+                } else if (line.StartsWith("#define_no_skip_strupr")) {
+                    skipStrupr = false;
                 }
             }
 

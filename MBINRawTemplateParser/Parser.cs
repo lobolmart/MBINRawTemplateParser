@@ -33,9 +33,12 @@ namespace MBINRawTemplateParser
             TAB + "public class ";
         private static readonly string HEADER_END = " : NMSTemplate\r\n" + TAB + "{\r\n" + TAB2 + "// generated with MBINRawTemplateParser\r\n\r\n";
         private static readonly string FOOTER = TAB + "}\r\n}\r\n";
-
         private static readonly string COMMENT_START = TAB + " // ";
+
+        private string lastNonSkippedLine = EMPTY_STRING;
         private string className = null;
+        private bool skipNextLine = false;
+        private bool skipNextNullLine = false;
         private bool skipStringNull = true;
         private bool skipStrupr = true;
 
@@ -123,12 +126,21 @@ namespace MBINRawTemplateParser
             return false;
         }
 
+        private bool isNullLine(string line)
+        {
+            return hasStr(line, " = 0;");
+        }
+
         private bool canSkip(string line)
         {
             if (!hasVar(line))
                 return true;
             if (hasStr(line, "strupr") && skipStrupr)
                 return true;
+            if (isLineString(lastNonSkippedLine) && isNullLine(line) && skipNextNullLine) {
+                skipNextNullLine = false;
+                return true;
+            }
             return false;
         }
 
@@ -426,8 +438,6 @@ namespace MBINRawTemplateParser
             return res;
         }
 
-        private bool skipNextLine = false;
-
         private string parseLine(ref string[] lines, int i)
         {
             string result = null;
@@ -442,7 +452,7 @@ namespace MBINRawTemplateParser
                 case LineType.STRING:
                     result = parseString(line);
                     if (!result.Equals(EMPTY_STRING) && skipStringNull)
-                        skipNextLine = true;
+                        skipNextNullLine = true;
                     break;
                 case LineType.NUMBER:
                     result = parseNumber(line);
@@ -517,7 +527,8 @@ namespace MBINRawTemplateParser
 
             len = lines.Length;
             for (; i < len; i++) {
-                string line = lines[i];
+                string lineOrigin = lines[i];
+                string line = lineOrigin;
                 if (line.StartsWith("//")) {
                     line = TAB2 + "// line: " + line + "\r\n";
                     output += line;
@@ -533,6 +544,7 @@ namespace MBINRawTemplateParser
                 }
                 string lineResult = parseLine(ref lines, i);
                 if (!lineResult.Equals(EMPTY_STRING)) {
+                    lastNonSkippedLine = lineOrigin;
                     output += lineResult + line;
                     propCounter++;
                 } else {

@@ -82,6 +82,7 @@ namespace MBINRawTemplateParser
                     case 3:
                         res += "does " + lastOffset.ToString() + " contain a DWORD?";
                         break;
+                    case 6:
                     case 7:
                         res += "does " + lastOffset.ToString() + " contain a QWORD?";
                         break;

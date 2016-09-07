@@ -123,12 +123,21 @@ namespace MBINRawTemplateParser
             return false;
         }
 
+        private bool canSkip(string line)
+        {
+            if (!hasVar(line))
+                return true;
+            if (hasStr(line, "strupr") && skipStrupr)
+                return true;
+            return false;
+        }
+
         private LineType getLineType(string line)
         {
             if (isLineBlock(line))
                 return LineType.BLOCK;
 
-            if (!hasVar(line)) // no variables -  not acting on the buffer?
+            if (canSkip(line)) // no variables -  not acting on the buffer?
                 return LineType.NOP;
 
             if (isLineString(line))

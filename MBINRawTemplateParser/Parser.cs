@@ -62,6 +62,12 @@ namespace MBINRawTemplateParser
 
             // Console.WriteLine("offset:" + offset + ", lastOffset: " + lastOffset + ", sz: " + lastOffsetSz);
 
+            // rough fixup for string lines and by their following null termination if skipped
+            if (diff == 1 && isLineString(lastNonSkippedLine) && skipStringNull) {
+                lastOffsetSz++;
+                diff = 0;
+            }
+
             if (diff > 0) {
                 res += "\r\n" + TAB2 + "// missing " + diff.ToString() +
                     " bytes at offset " + lastOffset.ToString() + "\r\n" + TAB2 + "// ";

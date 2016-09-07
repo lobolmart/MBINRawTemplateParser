@@ -53,10 +53,13 @@ namespace MBINRawTemplateParser
             string res = EMPTY_STRING;
             int diff = offset - (lastOffset + lastOffsetSz);
 
+            if (offset + sz < lastOffset)
+                res += "\r\n" + TAB2 + "// WARNING: lower offset accessed!\r\n\r\n";
+
             // Console.WriteLine("offset:" + offset + ", lastOffset: " + lastOffset + ", sz: " + lastOffsetSz);
 
             if (diff > 0) {
-                res = "\r\n" + TAB2 + "// missing " + diff.ToString() +
+                res += "\r\n" + TAB2 + "// missing " + diff.ToString() +
                     " bytes at offset " + lastOffset.ToString() + "\r\n" + TAB2 + "// ";
                 switch (diff) {
                     default:

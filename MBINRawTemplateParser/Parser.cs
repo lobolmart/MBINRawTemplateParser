@@ -369,7 +369,10 @@ namespace MBINRawTemplateParser
             string offset = "0";
             if (idxPlus != -1) {
                 idxPlus += 2;
-                offset = line.Substring(idxPlus, line.LastIndexOf(");") - idxPlus);
+                if (!hasStr(line, "*)("))
+                    offset = line.Substring(idxPlus, line.LastIndexOf(");") - idxPlus); // no pointer cast
+                else
+                    offset = line.Substring(idxPlus, line.LastIndexOf("));") - idxPlus);
             }
 
             string offsetHex;

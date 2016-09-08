@@ -105,7 +105,7 @@ namespace MBINRawTemplateParser
 
             accSize += sz + diff;
             if (logAccSize)
-                res += TAB2 + "// accSize: " + accSize.ToString() + "\r\n";
+                res += TAB2 + "// acc. size: " + accSize.ToString() + "\r\n";
 
             lastOffset = offset;
             lastOffsetSz = sz;

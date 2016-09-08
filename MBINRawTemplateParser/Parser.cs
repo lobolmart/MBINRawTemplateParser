@@ -604,7 +604,7 @@ namespace MBINRawTemplateParser
             }
 
             accSize += diff;
-            string accStr = "accumulated template size: " + accSize.ToString();
+            string accStr = "accumulated template size: " + accSize.ToString() + " (0x" + accSize.ToString("X") + ")";
             string nPropsStr = "number of properties parsed: " + propCounter.ToString();
             Console.WriteLine(accStr);
             Console.WriteLine(nPropsStr);

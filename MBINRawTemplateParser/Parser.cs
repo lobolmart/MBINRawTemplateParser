@@ -584,7 +584,7 @@ namespace MBINRawTemplateParser
                     output += TAB2 + "public byte[] Padding" + padOffset.ToString("X") + ";" +
                         TAB2 + "// offset: " + padOffset.ToString() + ", sz: " + diff + ", comment: auto-padding at the end\r\n";
                 } else if (diff < 0) {
-                    output += "\r\n" + TAB2 + "// WARNING: the resulted template is " + (-diff).ToString() + " bytes bigger than the #deine_sz value!\r\n";
+                    output += "\r\n" + TAB2 + "// WARNING: the resulted template is " + (-diff).ToString() + " bytes larger than expected (#define_sz)!\r\n";
                 } else if (diff == 0) {
                     output += "\r\n" + TAB2 + "// no end padding needed\r\n";
                 }

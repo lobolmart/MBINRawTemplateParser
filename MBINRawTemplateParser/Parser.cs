@@ -43,6 +43,8 @@ namespace MBINRawTemplateParser
         private bool skipStringNull = true;
         private bool skipStrupr = true;
         private int templateSize = -1;
+        private int accSize = 0;
+        private bool logAccSize = false;
 
         private bool verbose;
 
@@ -61,8 +63,6 @@ namespace MBINRawTemplateParser
 
             if (offset + sz < lastOffset)
                 res += "\r\n" + TAB2 + "// WARNING: lower offset accessed!\r\n\r\n";
-
-            // Console.WriteLine("offset:" + offset + ", lastOffset: " + lastOffset + ", sz: " + lastOffsetSz);
 
             // rough fixup for string lines and by their following null termination if skipped
             if (diff == 1 && isLineString(lastNonSkippedLine) && skipStringNull) {
@@ -100,6 +100,10 @@ namespace MBINRawTemplateParser
                 res += TAB2 + "public byte[] Padding" + padOffset.ToString("X") + ";" +
                     TAB2 + "// offset: " + padOffset.ToString() + ", sz: " + diff + ", comment: auto padding \r\n\r\n";
             }
+
+            accSize += sz + diff;
+            if (logAccSize)
+                res += TAB2 + "// accSize: " + accSize.ToString() + "\r\n";
 
             lastOffset = offset;
             lastOffsetSz = sz;
@@ -526,6 +530,8 @@ namespace MBINRawTemplateParser
                 } else if (line.StartsWith("#define_sz")) {
                     args = line.Split(' ');
                     templateSize = int.Parse(args[1]);
+                } else if (line.StartsWith("#define_log_acc_size")) {
+                    logAccSize = true;
                 }
             }
 
@@ -576,8 +582,9 @@ namespace MBINRawTemplateParser
                 }
             }
 
+            int diff = 0;
             if (templateSize > -1) {
-                int diff = templateSize - (lastOffset + lastOffsetSz);
+                diff = templateSize - (lastOffset + lastOffsetSz);
                 if (diff > 0) {
                     int padOffset = lastOffset + lastOffsetSz;
                     output += "\r\n" + TAB2 + "[NMS(Size = 0x" + diff.ToString("X") + ", Ignore = true)]\r\n";
@@ -592,9 +599,15 @@ namespace MBINRawTemplateParser
                 output += "\r\n" + TAB2 + "// template size not set. add '#define_sz <decimal>' on top of the input for auto-padding at the end." + "\r\n";
             }
 
-            output += FOOTER;
+            accSize += diff;
+            string accStr = "accumulated template size: " + accSize.ToString();
+            string nPropsStr = "number of properties parsed: " + propCounter.ToString();
+            Console.WriteLine(accStr);
+            Console.WriteLine(nPropsStr);
+            output += "\r\n" + TAB2 + "// " + accStr;
+            output += "\r\n" + TAB2 + "// " + nPropsStr + "\r\n";
 
-            Console.WriteLine("number of properties parsed: " + propCounter.ToString());
+            output += FOOTER;
 
             return output;
         }

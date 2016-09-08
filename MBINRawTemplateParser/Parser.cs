@@ -31,7 +31,8 @@ namespace MBINRawTemplateParser
 
         private static readonly string HEADER_START = "namespace MBINCompiler.Models.Structs\r\n{\r\n" +
             TAB + "public class ";
-        private static readonly string HEADER_END = " : NMSTemplate\r\n" + TAB + "{\r\n" + TAB2 + "// generated with MBINRawTemplateParser\r\n\r\n";
+        private static readonly string HEADER_END1 = " : NMSTemplate";
+        private static readonly string HEADER_END2 = "\r\n" + TAB + "{\r\n" + TAB2 + "// generated with MBINRawTemplateParser\r\n\r\n";
         private static readonly string FOOTER = TAB + "}\r\n}\r\n";
         private static readonly string COMMENT_START = TAB + " // ";
 
@@ -41,6 +42,7 @@ namespace MBINRawTemplateParser
         private bool skipNextNullLine = false;
         private bool skipStringNull = true;
         private bool skipStrupr = true;
+        private int templateSize = -1;
 
         private bool verbose;
 
@@ -521,6 +523,9 @@ namespace MBINRawTemplateParser
                     skipStringNull = false;
                 } else if (line.StartsWith("#define_no_skip_strupr")) {
                     skipStrupr = false;
+                } else if (line.StartsWith("#define_sz")) {
+                    args = line.Split(' ');
+                    templateSize = int.Parse(args[1]);
                 }
             }
 
@@ -539,7 +544,9 @@ namespace MBINRawTemplateParser
             string routineHash = FNV32.getHash(lines[i]).ToString("X");
             string header = "// generated output for subroutine:\r\n// " + lines[i] + " -----> hash: " + routineHash +
                 "\r\n// hash of whole input: " + templateHash + "\r\n\r\n";
-            header += HEADER_START + (className != null ? className : "UnknownTemplate" + routineHash) + HEADER_END;
+            header += HEADER_START + (className != null ? className : "UnknownTemplate" + routineHash) +
+                HEADER_END1 + ((templateSize > -1) ? " // 0x" + templateSize.ToString("X") : "") +
+                HEADER_END2;
             output += header;
 
             len = lines.Length;
@@ -567,6 +574,20 @@ namespace MBINRawTemplateParser
                 } else {
                     output += line;
                 }
+            }
+
+            if (templateSize > -1) {
+                int diff = templateSize - (lastOffset + lastOffsetSz);
+                if (diff > 0) {
+                    int padOffset = lastOffset + lastOffsetSz;
+                    output += "\r\n" + TAB2 + "[NMS(Size = 0x" + diff.ToString("X") + ", Ignore = true)]\r\n";
+                    output += TAB2 + "public byte[] Padding" + padOffset.ToString("X") + ";" +
+                        TAB2 + "// offset: " + padOffset.ToString() + ", sz: " + diff + ", comment: auto-padding at the end\r\n";
+                } else {
+                    output += "\r\n" + TAB2 + "// no end padding needed\r\n";
+                }
+            } else {
+                output += "\r\n" + TAB2 + "// template size not set. add '#define_sz <decimal>' on top of the input for auto-padding at the end." + "\r\n";
             }
 
             output += FOOTER;

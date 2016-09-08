@@ -45,6 +45,7 @@ namespace MBINRawTemplateParser
         private int templateSize = -1;
         private int accSize = 0;
         private bool logAccSize = false;
+        private bool stringNullFixup1 = true;
 
         private bool verbose;
 
@@ -64,9 +65,10 @@ namespace MBINRawTemplateParser
             if (offset + sz < lastOffset)
                 res += "\r\n" + TAB2 + "// WARNING: lower offset accessed!\r\n\r\n";
 
-            // rough fixup for string lines and by their following null termination if skipped
-            if (diff == 1 && isLineString(lastNonSkippedLine) && skipStringNull) {
-                lastOffsetSz++;
+            // rough fixup for string lines and their following null termination (if skipped)
+            if (diff > 0 && stringNullFixup1 && isLineString(lastNonSkippedLine) && skipStringNull) {
+                res += "\r\n" + TAB2 + "// WARNING: applying string null termination fixup! missing " + diff.ToString() + " byte(s) after string?\r\n\r\n";
+                lastOffsetSz += diff;
                 diff = 0;
             }
 
@@ -532,6 +534,8 @@ namespace MBINRawTemplateParser
                     templateSize = int.Parse(args[1]);
                 } else if (line.StartsWith("#define_log_acc_size")) {
                     logAccSize = true;
+                } else if (line.StartsWith("#define_no_string_null_fixup1")) {
+                    stringNullFixup1 = false;
                 }
             }
 

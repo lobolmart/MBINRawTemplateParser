@@ -45,7 +45,7 @@ namespace MBINRawTemplateParser
         private int templateSize = -1;
         private int accSize = 0;
         private bool logAccSize = false;
-        private bool stringNullFixup1 = true;
+        private bool stringNullFixup1 = false;
 
         private bool verbose;
 
@@ -534,8 +534,8 @@ namespace MBINRawTemplateParser
                     templateSize = int.Parse(args[1]);
                 } else if (line.StartsWith("#define_log_acc_size")) {
                     logAccSize = true;
-                } else if (line.StartsWith("#define_no_string_null_fixup1")) {
-                    stringNullFixup1 = false;
+                } else if (line.StartsWith("#define_string_null_fixup1")) {
+                    stringNullFixup1 = true;
                 }
             }
 

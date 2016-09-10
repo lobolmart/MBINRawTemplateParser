@@ -268,19 +268,19 @@ namespace MBINRawTemplateParser
                 }
 
                 if (valueIs64Bit && valueStr.IndexOf("E") == -1) {
-                    if (hasStr(line, " = 0i64")) { // either a long, two floats or two ints?
+                    if (hasStr(line, " = 0i64") && (offsetInt % 8 == 0)) { // either a long, two floats or two ints?
 
                         res += updateOffsetDiff(offsetInt, 8);
 
                         sz = 8;
                         type = "long";
-                        valueStr = "0, comment: either a long, two floats or two ints?";
+                        valueStr = "0, comment: aligned to 8 bytes! a long, two floats or two ints?";
                     } else {
                         // e.g. *(_QWORD *)(v1 + 15680) = 0x40000000i64;
 
                         res += updateOffsetDiff(offsetInt, 8);
 
-                        string packedComment = ", comment: two packed floats in a QWORD?";
+                        string packedComment = ", comment: unaligned to 8 bytes! two packed floats in a QWORD?";
 
                         // first float is a value
                         valueStr = valueStr.Replace(',', '.');

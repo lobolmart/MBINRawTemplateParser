@@ -62,7 +62,7 @@ namespace MBINRawTemplateParser
             string res = EMPTY_STRING;
             int diff = offset - (lastOffset + lastOffsetSz);
 
-            if (offset + sz < lastOffset)
+            if (offset < lastOffset)
                 res += "\r\n" + TAB2 + "// WARNING: lower offset accessed!\r\n\r\n";
 
             // rough fixup for string lines and their following null termination (if skipped)
